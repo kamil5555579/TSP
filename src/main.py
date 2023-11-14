@@ -1,3 +1,5 @@
-import numpy as np
+from population import Population
 
-print('main')
+population = Population(population_size=100, map_size=100, num_cities=10)
+population.calculate_fitness()
+population.plot_best_route(filename="fig.png", show=True, title="0")
