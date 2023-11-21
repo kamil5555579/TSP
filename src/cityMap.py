@@ -27,7 +27,7 @@ class CityMap:
         length += self.adjacency_matrix[genome[-1]][genome[0]]
         return length
 
-    def plot(self, genome, size, filename = "fig.png", show = False, title = "", polish = False):
+    def plot(self, genome, size, filename = "fig.png", show = False, title = "", polish = False, save = True):
 
         if polish:
             fig, ax = generate_poland_map()
@@ -42,7 +42,11 @@ class CityMap:
         if title != "":
             ax.set_title('Generation: ' + str(title) )
     
-        fig.savefig(filename)
+        if save:
+            fig.savefig(filename)
+            
         if show is True:
             plt.show()
+
+        return fig
         
