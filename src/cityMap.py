@@ -1,10 +1,12 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import random
+from poland import generate_poland_map
 
 class CityMap:
     def __init__(self, cities) -> None:
         self.cities = cities
+        print([city.x for city in cities], [city.y for city in cities])
 
     def random_route(self):
         cities_copy = self.cities.copy()
@@ -25,13 +27,17 @@ class CityMap:
         length += self.adjacency_matrix[genome[-1]][genome[0]]
         return length
 
-    def plot(self, genome, size, filename = "fig.png", show = False, title = ""):
+    def plot(self, genome, size, filename = "fig.png", show = False, title = "", polish = False):
 
-        fig, ax = plt.subplots()
+        if polish:
+            fig, ax = generate_poland_map()
+        else:
+            fig, ax = plt.subplots()
+            ax.set_xlim(0,size)
+            ax.set_ylim(0,size)
+
         ax.plot(np.append([self.cities[city_index].x for city_index in genome], self.cities[genome[0]].x),
                  np.append([self.cities[city_index].y for city_index in genome], self.cities[genome[0]].y), '-o')
-        ax.set_xlim(0,size)
-        ax.set_ylim(0,size)
 
         if title != "":
             ax.set_title('Generation: ' + str(title) )
