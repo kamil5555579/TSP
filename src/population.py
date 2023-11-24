@@ -16,7 +16,8 @@ class Population:
 
         self.map_size = map_size
         self.cityMap.calculate_adjacency_matrix()
-        self.population = [self.cityMap.random_route() for _ in range(population_size)]
+        self.population = \
+            [self.cityMap.random_route() for o in range(population_size)]
         print(self.population)
 
     def calculate_fitness(self):

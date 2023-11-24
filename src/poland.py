@@ -1,12 +1,22 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 import geopandas as gpd
+import os
 from city import City
 
-borders = gpd.read_file('maps\PRG_jednostki_administracyjne_2022')
+#path = os.getcwd()
+path = os.path.normpath(os.getcwd() + os.sep + os.pardir)
+
+borders = gpd.read_file(os.path.join(
+    path, 
+    'maps', 
+    'PRG_jednostki_administracyjne_2022'))
 borders = borders['geometry']
 
-cities = pd.read_html('maps\wspolrzedne_polskich_miast.html')[3]
+cities = pd.read_html(os.path.join(
+    path, 
+    'maps', 
+    'wspolrzedne_polskich_miast.html'))[3]
 cities.columns = cities.iloc[0]
 cities = cities.iloc[1:]
 cities['Szerokość'] = cities['Szerokość'].str.replace('°N', '').astype(float)
