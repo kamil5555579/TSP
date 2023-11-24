@@ -1,4 +1,6 @@
 import random
+
+
 class City:
     def __init__(self, x, y, index) -> None:
         self.x = x
@@ -12,4 +14,6 @@ def initialize_cities(num_cities, size):
     cities = []
     for i in range(num_cities):
         cities.append(City(random.randint(0, size), random.randint(0, size), i))
+        # There is a possiblity of copies if 2 random nubers will be the same in
+        # in two diffrent iterations
     return cities
