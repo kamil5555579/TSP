@@ -10,7 +10,8 @@ class Population:
         self.polish = polish
 
         if polish:
-            self.cityMap = CityMap(generate_polish_cities(num_cities, map_size))
+            self.cityMap = CityMap(generate_polish_cities(num_cities, map_size)) 
+            # jeszcze ogarne lepiej to generowanie miast bo na razie zawsze są te same i ta sama ilość
         else:
             self.cityMap = CityMap(initialize_cities(num_cities, map_size))
 
@@ -45,25 +46,25 @@ class Population:
             
             self.population = new_population
 
-        elif mode == "tournament":
+        elif mode == "tournament": # drugi rodzaj selekcji też możesz zrobić
             pass
         else:
             raise Exception("Wrong selection mode")
         
-    def crossover(self, mode = "order"):
-        if mode == "order":
+    def crossover(self, mode = "ox"):
+        if mode == "ox": # To ja zrobię
             pass
-        elif mode == "pmx":
+        elif mode == "pmx": # to dla Ciebie
+            pass
+        elif mode == "GX": # dla mnie 
+            pass
+        elif mode == "MSCX": # dla ciebie
             pass
         else:
             raise Exception("Wrong crossover mode")
         
-    def mutation(self, mode = "swap"):
+    def mutation(self, mode = "swap"): # mutacja dla Ciebie
         if mode == "swap":
-            pass
-        elif mode == "insert":
-            pass
-        elif mode == "inversion":
             pass
         else:
             raise Exception("Wrong mutation mode")
@@ -80,8 +81,10 @@ class Population:
             self.calculate_fitness()
             self.figures.append(self.plot_best_route(filename="fig" + str(i) + ".png", show=False, title=i, save=True))
 
-    def plot_evolution(self, filename = "evolution.gif"):
-        pass
+        # tu po tym można zrobić animację, albo w nowej metodzie - dla ciebie
+
+        # i wykres dlugosci od generacji - dla mnie
+
 
 
 
