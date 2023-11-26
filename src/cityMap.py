@@ -6,7 +6,7 @@ from poland import generate_poland_map
 class CityMap:
     def __init__(self, cities) -> None:
         self.cities = cities
-        print([city.x for city in cities], [city.y for city in cities])
+        #print([city.x for city in cities], [city.y for city in cities])
 
     def random_route(self):
         cities_copy = self.cities.copy()
@@ -47,6 +47,8 @@ class CityMap:
             
         if show is True:
             plt.show()
+
+        plt.close(fig)
 
         return fig
         
