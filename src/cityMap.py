@@ -11,7 +11,7 @@ class CityMap:
     def random_route(self):
         cities_copy = self.cities.copy()
         random.shuffle(cities_copy)
-        route = [city.index for city in cities_copy]
+        route = np.array([city.index for city in cities_copy])
         return route
 
     def calculate_adjacency_matrix(self):
