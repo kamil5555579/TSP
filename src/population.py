@@ -94,9 +94,18 @@ class Population:
         else:
             raise Exception("Wrong crossover mode")
         
-    def mutation(self, mode = "swap"): # mutacja dla Ciebie
+    def mutation(self, mode = "swap", chance = 0.001):
         if mode == "swap":
-            pass
+            for person in self.population:
+                if random.random() <= chance: 
+                    random_index_1 = random.randint(0, len(person)-1)
+                    while True:
+                        random_index_2 = random.randint(0, len(person)-1)
+                        if random_index_2 != random_index_1:
+                            break
+
+                    person[random_index_1], person[random_index_2] = \
+                        person[random_index_2], person[random_index_1] 
         else:
             raise Exception("Wrong mutation mode")
     
