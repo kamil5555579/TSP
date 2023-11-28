@@ -1,11 +1,14 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import random
-from poland import generate_poland_map
+from poland import Poland
+from city import City, initialize_cities
 
 class CityMap:
-    def __init__(self, cities) -> None:
+    def __init__(self, cities, map_size, polish) -> None:
         self.cities = cities
+        self.map_size = map_size
+        self.polish = polish
         #print([city.x for city in cities], [city.y for city in cities])
 
     def random_route(self):
@@ -30,7 +33,7 @@ class CityMap:
     def plot(self, genome, size, filename = "fig.png", show = False, title = "", polish = False, save = True):
 
         if polish:
-            fig, ax = generate_poland_map()
+            fig, ax = Poland.generate_poland_map()
         else:
             fig, ax = plt.subplots()
             ax.set_xlim(0,size)
@@ -52,3 +55,12 @@ class CityMap:
 
         return fig
         
+
+def create_city_map(num_cities, map_size, polish=False):
+    if polish:
+        cities = Poland.generate_polish_cities(num_cities, map_size)
+    else:
+        cities = initialize_cities(num_cities, map_size)
+    cityMap = CityMap(cities, map_size, polish)
+    cityMap.calculate_adjacency_matrix()
+    return cityMap

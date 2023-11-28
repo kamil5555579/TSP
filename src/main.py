@@ -13,4 +13,9 @@ population.evolution(num_generations=30,
 
 population.plot_route_lenghts()
 """
-compare_crossovers()
+compare_crossovers(population_size=50,
+                    map_size=100, 
+                    num_cities=15, polish=False, 
+                    num_generations=100, 
+                    selection_mode="roulette", 
+                    mutation_mode="swap")

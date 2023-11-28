@@ -1,24 +1,17 @@
 from cityMap import CityMap
 from city import City, initialize_cities
 import random
-from poland import generate_polish_cities
+from poland import Poland
 import numpy as np
 import matplotlib.pyplot as plt
 
 class Population:
 
-    def __init__(self, population_size, map_size, num_cities, polish = False) -> None:
+    def __init__(self, population_size, cityMap) -> None:
         self.population_size = population_size
-        self.polish = polish
-
-        if polish:
-            self.cityMap = CityMap(generate_polish_cities(num_cities, map_size)) 
-            # jeszcze ogarne lepiej to generowanie miast bo na razie zawsze są te same i ta sama ilość
-        else:
-            self.cityMap = CityMap(initialize_cities(num_cities, map_size))
-
-        self.map_size = map_size
-        self.cityMap.calculate_adjacency_matrix()
+        self.cityMap = cityMap
+        self.map_size = cityMap.map_size
+        self.polish = cityMap.polish
         self.population = \
             [self.cityMap.random_route() for o in range(population_size)]
         #print(self.population)
