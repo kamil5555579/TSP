@@ -87,51 +87,87 @@ class Population:
 
         elif mode == "pmx": # to dla Ciebie
             pass
-        elif mode == "gx": # dla mnie 
+
+        elif mode == "cx": # dla mnie
             new_population = []
-            #self.population = sorted(self.population, key = lambda x: random.random())
-            random.shuffle(self.population)
-            #print(self.population)
+            self.population = sorted(self.population, key = lambda x: random.random())
 
             for i in range(0, self.population_size, 2):
                 genome_length = len(self.population[i])
                 parent1 = self.population[i]
                 parent2 = self.population[i+1]
-                child = np.ones(genome_length, dtype=int) * -1 # -1 means that there is no city with such index
-                city = 0
-                for i in range(genome_length-1):
-                    parent1_node = np.where(parent1 == city)[0][0]
-                    parent2_node = np.where(parent2 == city)[0][0]
-                    #print(parent1, parent2)
-                    #print(parent1_node, parent2_node)
-                    child[i] = city
-                    adjacent_cities = [parent1[(parent1_node - 1) % genome_length],
-                                        parent1[(parent1_node + 1) % genome_length],
-                                        parent2[(parent2_node - 1) % genome_length],
-                                        parent2[(parent2_node + 1) % genome_length]]
-                    distances = [self.cityMap.adjacency_matrix[city][adjacent_city] for adjacent_city in adjacent_cities]
-                    #print(adjacent_cities)
-                    #print(distances)
-                    #print(child)
-                    while True:
-                        nearest_city = adjacent_cities[distances.index(min(distances))]
-                        if nearest_city not in child:
-                            break
-                        elif len(distances) > 1:
-                            distances.remove(min(distances))
-                            adjacent_cities.remove(nearest_city)
-                        else:
-                            nearest_city = random.randint(0, genome_length - 1)
-                            while nearest_city in child:
-                                nearest_city = random.randint(0, genome_length - 1)
-                            break
-                            
-                    city = nearest_city
-                
-                child[-1] = city
-                #print(child)
+                child1 = np.ones(genome_length, dtype=int) * -1
+                child2 = np.ones(genome_length, dtype=int) * -1
 
-                new_population.append(child)
+                city = parent1[0]
+                child1[0] = city
+                while True:
+                    city_index = np.where(parent2 == city)[0][0]
+                    city = parent1[city_index]
+                    child1[city_index] = city
+                    if city == parent2[0]:
+                        break
+
+                city = parent2[0]
+                child2[0] = city
+                while True:
+                    city_index = np.where(parent1 == city)[0][0]
+                    city = parent2[city_index]
+                    child2[city_index] = city
+                    if city == parent1[0]:
+                        break
+
+                for j in range(genome_length):
+                    if child1[j] == -1:
+                        child1[j] = parent2[j]
+                    if child2[j] == -1:
+                        child2[j] = parent1[j]
+
+                new_population.append(child1)
+                new_population.append(child2)
+
+            self.population = new_population
+
+        elif mode == "gx": # dla mnie 
+            new_population = []
+
+            for _ in range(2): # 2 parents only produce 1 child so we need to do it twice
+                self.population = sorted(self.population, key = lambda x: random.random())
+
+                for i in range(0, self.population_size, 2):
+                    genome_length = len(self.population[i])
+                    parent1 = self.population[i]
+                    parent2 = self.population[i+1]
+                    child = np.ones(genome_length, dtype=int) * -1 # -1 means that there is no city with such index
+                    city = 0
+                    for i in range(genome_length-1):
+                        parent1_city_index = np.where(parent1 == city)[0][0]
+                        parent2_city_index = np.where(parent2 == city)[0][0]
+                        child[i] = city
+                        adjacent_cities = [parent1[(parent1_city_index - 1) % genome_length],
+                                            parent1[(parent1_city_index + 1) % genome_length],
+                                            parent2[(parent2_city_index - 1) % genome_length],
+                                            parent2[(parent2_city_index + 1) % genome_length]]
+                        distances = [self.cityMap.adjacency_matrix[city][adjacent_city] for adjacent_city in adjacent_cities]
+
+                        while True:
+                            nearest_city = adjacent_cities[distances.index(min(distances))]
+                            if nearest_city not in child:
+                                break
+                            elif len(distances) > 1:
+                                distances.remove(min(distances))
+                                adjacent_cities.remove(nearest_city)
+                            else:
+                                nearest_city = random.randint(0, genome_length - 1)
+                                while nearest_city in child:
+                                    nearest_city = random.randint(0, genome_length - 1)
+                                break
+                                
+                        city = nearest_city
+                    
+                    child[-1] = city
+
+                    new_population.append(child)
 
             self.population = new_population
 
@@ -157,7 +193,6 @@ class Population:
             self.fitnesses.append(max(self.fitness))
             self.selection(selection_mode)
             self.crossover(crossover_mode)
-            #print(self.population)
             self.mutation(mutation_mode)
             self.calculate_fitness()
 
@@ -167,14 +202,15 @@ class Population:
                                                 save=True))
         self.fitnesses.append(max(self.fitness))
 
+        self.route_lengths = [1/fitness for fitness in self.fitnesses]
+
         # tu po tym można zrobić animację, albo w nowej metodzie - dla ciebie
 
         # i wykres dlugosci od generacji - dla mnie
 
     def plot_route_lenghts(self):
         fig, ax = plt.subplots()
-        route_lengths = [1/fitness for fitness in self.fitnesses]
-        ax.plot(route_lengths)
+        ax.plot(self.route_lengths)
         ax.set_xlabel("Generation")
         ax.set_ylabel("Route length")
         ax.set_title("Route length over generations")
