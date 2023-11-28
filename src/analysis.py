@@ -9,7 +9,8 @@ def compare_crossovers(population_size=30,
                      polish=False, 
                      num_generations=30, 
                      selection_mode="roulette",
-                     mutation_mode="swap"):
+                     mutation_mode="swap",
+                     elitism=0.2):
 
     crossovers = ["ox", "cx", "gx"]
     route_lengths = []
@@ -22,7 +23,8 @@ def compare_crossovers(population_size=30,
         population.evolution(num_generations=num_generations, 
                         selection_mode=selection_mode,
                         crossover_mode=crossover, 
-                        mutation_mode=mutation_mode)
+                        mutation_mode=mutation_mode,
+                        elitism=elitism)
         route_lengths.append(population.route_lengths)
 
     dummy_route_length = dummy_algorithm(cityMap)

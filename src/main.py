@@ -18,4 +18,5 @@ compare_crossovers(population_size=50,
                     num_cities=15, polish=False, 
                     num_generations=100, 
                     selection_mode="roulette", 
-                    mutation_mode="swap")
+                    mutation_mode="swap",
+                    elitism=0.2)

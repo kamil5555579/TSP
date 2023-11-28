@@ -47,15 +47,21 @@ class Population:
         else:
             raise Exception("Wrong selection mode")
         
-    def crossover(self, mode = "ox"):
+    def crossover(self, mode = "ox", elitism = 0.2):
         if mode == "ox": # To ja zrobię
             new_population = []
-            self.population = sorted(self.population, key = lambda x: random.random())
+            # Sort by fitness
+            sorted_population = [x for _, x in sorted(zip(self.fitness, self.population), key=lambda pair: pair[0], reverse=True)]
+            elites = int(elitism * self.population_size)
 
-            for i in range(0, self.population_size, 2):
+            new_population[0:elites] = sorted_population[0:elites]
+            mating_pool = sorted_population[elites:]
+            mating_pool = sorted(mating_pool, key=lambda x: random.random())
+
+            for i in range(0, len(mating_pool), 2):
                 genome_length = len(self.population[i])
-                parent1 = self.population[i]
-                parent2 = self.population[i+1]
+                parent1 = mating_pool[i]
+                parent2 = mating_pool[i+1]
                 child1 = np.ones(genome_length, dtype=int) * -1 # -1 means that there is no city with such index
                 child2 = np.ones(genome_length, dtype=int) * -1 # -1 means that there is no city with such index
                 start_point = random.randint(0, genome_length - 1)
@@ -184,7 +190,7 @@ class Population:
         else:
             raise Exception("Wrong mutation mode")
     
-    def evolution(self, selection_mode = "roulette", crossover_mode = "ox", mutation_mode = "swap", num_generations = 10):
+    def evolution(self, selection_mode = "roulette", crossover_mode = "ox", mutation_mode = "swap", num_generations = 10, elitism = 0.2):
 
         self.figures = []
         self.fitnesses = []
@@ -194,7 +200,7 @@ class Population:
             self.figures.append(self.plot_best_route(filename="fig" + str(i) + ".png", show=False, title=i, save=False))
             self.fitnesses.append(max(self.fitness))
             self.selection(selection_mode)
-            self.crossover(crossover_mode)
+            self.crossover(crossover_mode, elitism)
             self.mutation(mutation_mode)
             self.calculate_fitness()
 
