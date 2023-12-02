@@ -131,12 +131,12 @@ class Population:
             for _ in range(2): # 2 parents only produce 1 child so we need to do it twice
                 self.population = sorted(self.population, key = lambda x: random.random())
 
-                for i in range(0, self.population_size, 2):
+                for i in range(0, len(mating_pool), 2):
                     genome_length = len(self.population[i])
-                    parent1 = self.population[i]
-                    parent2 = self.population[i+1]
+                    parent1 = mating_pool[i]
+                    parent2 = mating_pool[i+1]
                     child = np.ones(genome_length, dtype=int) * -1 # -1 means that there is no city with such index
-                    city = 0
+                    city = random.randint(0, genome_length - 1)
                     for i in range(genome_length-1):
                         parent1_city_index = np.where(parent1 == city)[0][0]
                         parent2_city_index = np.where(parent2 == city)[0][0]
@@ -150,6 +150,54 @@ class Population:
                         while True:
                             nearest_city = adjacent_cities[distances.index(min(distances))]
                             if nearest_city not in child:
+                                break
+                            elif len(distances) > 1:
+                                distances.remove(min(distances))
+                                adjacent_cities.remove(nearest_city)
+                            else:
+                                nearest_city = random.randint(0, genome_length - 1)
+                                while nearest_city in child:
+                                    nearest_city = random.randint(0, genome_length - 1)
+                                break
+                                
+                        city = nearest_city
+                    
+                    child[-1] = city
+
+                    children.append(child)
+
+            return children
+
+        elif mode == "uhx":
+            children = []
+
+            for _ in range(2): # 2 parents only produce 1 child so we need to do it twice
+                self.population = sorted(self.population, key = lambda x: random.random())
+
+                for i in range(0, len(mating_pool), 2):
+                    genome_length = len(self.population[i])
+                    parent1 = mating_pool[i]
+                    parent2 = mating_pool[i+1]
+                    child = np.ones(genome_length, dtype=int) * -1 # -1 means that there is no city with such index
+                    city = random.randint(0, genome_length - 1)
+                    parent1_city_index = np.where(parent1 == city)[0][0]
+                    parent2_city_index = np.where(parent2 == city)[0][0]
+                    pointers = [parent1_city_index-1, parent1_city_index+1, parent2_city_index-1, parent2_city_index+1]
+                    for i in range(genome_length-1):
+                        child[i] = city
+                        adjacent_cities = [parent1[pointers[0] % genome_length],
+                                            parent1[pointers[1] % genome_length],
+                                            parent2[pointers[2] % genome_length],
+                                            parent2[pointers[3] % genome_length]]
+                        distances = [self.cityMap.adjacency_matrix[city][adjacent_city] for adjacent_city in adjacent_cities]
+
+                        while True:
+                            nearest_city = adjacent_cities[distances.index(min(distances))]
+                            if nearest_city not in child:
+                                if distances.index(min(distances)) == 0 or distances.index(min(distances)) == 2:
+                                    pointers[distances.index(min(distances))] -= 1
+                                else:
+                                    pointers[distances.index(min(distances))] += 1
                                 break
                             elif len(distances) > 1:
                                 distances.remove(min(distances))

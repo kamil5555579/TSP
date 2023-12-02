@@ -70,7 +70,7 @@ def compare_mutation_rates(population_size=30,
                      mutation_mode="swap",
                      num_elites=2):
 
-    mutation_rates = [0.001, 0.01, 0.05, 0.1]
+    mutation_rates = [0.001, 0.01, 0.05]
     route_lengths = []
     cityMap = create_city_map(num_cities, map_size, polish)
 
