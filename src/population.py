@@ -26,40 +26,36 @@ class Population:
         fig = self.cityMap.plot(self.population[np.argmax(self.fitness)], self.map_size, filename, show, title, polish = self.polish, save = save)
         return fig
     
-    def selection(self, mode = "roulette"):
+    def find_elites(self, num_elites = 2):
+        sorted_population = [x for _, x in sorted(zip(self.fitness, self.population), key=lambda pair: pair[0], reverse=True)]
+        mating_size = self.population_size - num_elites
+        elites = sorted_population[0:num_elites]
+        return elites, mating_size
+
+    def selection(self, mode = "roulette", mating_size = 0):
         
         if mode == "roulette":
 
             fitness_percentages = [fitness / self.fitness_sum for fitness in self.fitness]
-            new_population = []
+            mating_pool = []
 
-            for _ in range(self.population_size):
+            for _ in range(mating_size):
                 random_number = random.random()
                 for i in range(self.population_size):
                     if random_number < sum(fitness_percentages[:i+1]):
-                        new_population.append(self.population[i])
+                        mating_pool.append(self.population[i])
                         break
             
-            self.population = new_population
+            return mating_pool
 
         elif mode == "tournament": # drugi rodzaj selekcji też możesz zrobić
             pass
         else:
             raise Exception("Wrong selection mode")
         
-    def crossover(self, mode = "ox", elitism = 0.2):
+    def crossover(self, mode = "ox", mating_pool = []):
         if mode == "ox": # To ja zrobię
-            new_population = []
-            # Sort by fitness
-            self.calculate_fitness()
-            sorted_population = [x for _, x in sorted(zip(self.fitness, self.population), key=lambda pair: pair[0], reverse=True)]
-            #print(sorted(zip(self.fitness, self.population), key=lambda pair: pair[0], reverse=True))
-            elites = int(elitism * self.population_size)
-
-            new_population[0:elites] = sorted_population[0:elites]
-            mating_pool = sorted_population[elites:]
-            mating_pool = sorted(mating_pool, key=lambda x: random.random())
-            #print(new_population)
+            children = []
 
             for i in range(0, len(mating_pool), 2):
                 genome_length = len(self.population[i])
@@ -82,24 +78,21 @@ class Population:
                             if child2[k] == -1:
                                 child2[k] = parent1[j]
                                 break
-                new_population.append(child1)
-                new_population.append(child2)
+                children.append(child1)
+                children.append(child2)
 
-            self.population = new_population
-            self.calculate_fitness()
-            #print(sorted(zip(self.fitness, self.population), key=lambda pair: pair[0], reverse=True))
+            return children
 
         elif mode == "pmx": # to dla Ciebie
             pass
 
         elif mode == "cx": # dla mnie
-            new_population = []
-            self.population = sorted(self.population, key = lambda x: random.random())
+            children = []
 
-            for i in range(0, self.population_size, 2):
+            for i in range(0, len(mating_pool), 2):
                 genome_length = len(self.population[i])
-                parent1 = self.population[i]
-                parent2 = self.population[i+1]
+                parent1 = mating_pool[i]
+                parent2 = mating_pool[i+1]
                 child1 = np.ones(genome_length, dtype=int) * -1
                 child2 = np.ones(genome_length, dtype=int) * -1
 
@@ -127,13 +120,13 @@ class Population:
                     if child2[j] == -1:
                         child2[j] = parent1[j]
 
-                new_population.append(child1)
-                new_population.append(child2)
+                children.append(child1)
+                children.append(child2)
 
-            self.population = new_population
+            return children
 
         elif mode == "gx": # dla mnie 
-            new_population = []
+            children = []
 
             for _ in range(2): # 2 parents only produce 1 child so we need to do it twice
                 self.population = sorted(self.population, key = lambda x: random.random())
@@ -171,18 +164,18 @@ class Population:
                     
                     child[-1] = city
 
-                    new_population.append(child)
+                    children.append(child)
 
-            self.population = new_population
+            return children
 
         elif mode == "MSCX": # dla ciebie
             pass
         else:
             raise Exception("Wrong crossover mode")
         
-    def mutation(self, mode = "swap", chance = 0.001):
+    def mutation(self, mode = "swap", chance = 0.001, children = []):
         if mode == "swap":
-            for person in self.population:
+            for person in children:
                 if random.random() <= chance: 
                     random_index_1 = random.randint(0, len(person)-1)
                     while True:
@@ -192,10 +185,11 @@ class Population:
 
                     person[random_index_1], person[random_index_2] = \
                         person[random_index_2], person[random_index_1] 
+            return children
         else:
             raise Exception("Wrong mutation mode")
     
-    def evolution(self, selection_mode = "roulette", crossover_mode = "ox", mutation_mode = "swap", num_generations = 10, elitism = 0.2):
+    def evolution(self, selection_mode = "roulette", crossover_mode = "ox", mutation_mode = "swap", mutation_rate=0.001, num_generations = 10, num_elites = 2):
 
         self.figures = []
         self.fitnesses = []
@@ -204,9 +198,11 @@ class Population:
         for i in range(num_generations):
             self.figures.append(self.plot_best_route(filename="fig" + str(i) + ".png", show=False, title=i, save=False))
             self.fitnesses.append(max(self.fitness))
-            self.selection(selection_mode)
-            self.crossover(crossover_mode, elitism)
-            self.mutation(mutation_mode)
+            elites, mating_size = self.find_elites(num_elites)
+            mating_pool = self.selection(selection_mode, mating_size)
+            children = self.crossover(crossover_mode, mating_pool)
+            children = self.mutation(mutation_mode, chance=mutation_rate, children=children)
+            self.population = elites + children
             self.calculate_fitness()
 
         self.figures.append(self.plot_best_route(filename="fig" + str(num_generations) + ".png",
