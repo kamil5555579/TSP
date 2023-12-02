@@ -1,6 +1,4 @@
 import random
-
-
 class City:
     def __init__(self, x, y, index) -> None:
         self.x = x

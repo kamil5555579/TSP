@@ -1,22 +1,18 @@
-from population import Population
-from analysis import compare_crossovers
+from analysis import compare_crossovers, single_run
 
-"""
-population = Population(population_size=30, 
-                        map_size=100, 
-                        num_cities=15, 
-                        polish=False)
-population.evolution(num_generations=30, 
-                     selection_mode="roulette",
-                     crossover_mode="gx", 
-                     mutation_mode="swap")
+single_run(population_size=100,
+           map_size=200, 
+           num_cities=20, polish=False, 
+           num_generations=300, 
+           selection_mode="roulette", 
+           crossover_mode="ox", 
+           mutation_mode="swap",
+           elitism=0.2)
 
-population.plot_route_lenghts()
-"""
-compare_crossovers(population_size=50,
-                    map_size=100, 
-                    num_cities=15, polish=False, 
-                    num_generations=100, 
-                    selection_mode="roulette", 
-                    mutation_mode="swap",
-                    elitism=0.2)
+# compare_crossovers(population_size=50,
+#                     map_size=100, 
+#                     num_cities=15, polish=False, 
+#                     num_generations=500, 
+#                     selection_mode="roulette", 
+#                     mutation_mode="swap",
+#                     elitism=0.2)

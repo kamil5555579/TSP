@@ -2,14 +2,13 @@ import numpy as np
 import matplotlib.pyplot as plt
 import random
 from poland import Poland
-from city import City, initialize_cities
+from city import initialize_cities
 
 class CityMap:
     def __init__(self, cities, map_size, polish) -> None:
         self.cities = cities
         self.map_size = map_size
         self.polish = polish
-        #print([city.x for city in cities], [city.y for city in cities])
 
     def random_route(self):
         cities_copy = self.cities.copy()

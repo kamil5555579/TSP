@@ -51,12 +51,15 @@ class Population:
         if mode == "ox": # To ja zrobię
             new_population = []
             # Sort by fitness
+            self.calculate_fitness()
             sorted_population = [x for _, x in sorted(zip(self.fitness, self.population), key=lambda pair: pair[0], reverse=True)]
+            #print(sorted(zip(self.fitness, self.population), key=lambda pair: pair[0], reverse=True))
             elites = int(elitism * self.population_size)
 
             new_population[0:elites] = sorted_population[0:elites]
             mating_pool = sorted_population[elites:]
             mating_pool = sorted(mating_pool, key=lambda x: random.random())
+            #print(new_population)
 
             for i in range(0, len(mating_pool), 2):
                 genome_length = len(self.population[i])
@@ -83,6 +86,8 @@ class Population:
                 new_population.append(child2)
 
             self.population = new_population
+            self.calculate_fitness()
+            #print(sorted(zip(self.fitness, self.population), key=lambda pair: pair[0], reverse=True))
 
         elif mode == "pmx": # to dla Ciebie
             pass
@@ -207,7 +212,7 @@ class Population:
         self.figures.append(self.plot_best_route(filename="fig" + str(num_generations) + ".png",
                                                 show=False,
                                                 title=num_generations,
-                                                save=True))
+                                                save=False))
         self.fitnesses.append(max(self.fitness))
 
         self.route_lengths = [1/fitness for fitness in self.fitnesses]
@@ -216,13 +221,16 @@ class Population:
 
         # i wykres dlugosci od generacji - dla mnie
 
-    def plot_route_lenghts(self):
+    def plot_route_lenghts(self, filename = "route_length.png", show = False, save = True):
         fig, ax = plt.subplots()
         ax.plot(self.route_lengths)
         ax.set_xlabel("Generation")
         ax.set_ylabel("Route length")
         ax.set_title("Route length over generations")
-        fig.savefig("route_length.png")
+        if save:
+            fig.savefig('figures/'+ filename)
+        if show:
+            plt.show()
 
 
 

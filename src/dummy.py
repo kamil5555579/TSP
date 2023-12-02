@@ -1,5 +1,3 @@
-from cityMap import CityMap
-
 def dummy_algorithm(cityMap):
     adjacency_matrix = cityMap.adjacency_matrix
     cities = cityMap.cities
