@@ -4,6 +4,11 @@ import random
 from poland import Poland
 import numpy as np
 import matplotlib.pyplot as plt
+from Visualisation import  make_gif
+import os
+import shutil
+from progressbar import progressbar
+
 
 class Population:
 
@@ -84,7 +89,73 @@ class Population:
             return children
 
         elif mode == "pmx": # to dla Ciebie
-            pass
+            # Parameters
+            min_procentage_size = 0.25
+            max_procentage_size = 0.75
+
+            new_population = []
+
+            for _ in range(2):
+                # Creating two pools of parents
+                # P - stands for parent
+                rng = np.random.default_rng()
+                ref_indexes = np.arange(0, len(mating_pool), 1)
+                group_of_P0 = rng.choice(
+                    ref_indexes, 
+                    size=int(len(ref_indexes)/2), 
+                    replace=False)
+                group_of_P1 = ref_indexes[np.logical_not(np.isin(
+                    ref_indexes,
+                    group_of_P0))]
+                
+                for j in range(0, len(group_of_P0)):
+                    P0 = np.array(mating_pool[group_of_P0[j]])
+                    P1 = np.array(mating_pool[group_of_P1[j]])
+                    child = np.zeros_like(P0)
+
+                    min_size = np.rint(min_procentage_size * len(P0)) 
+                    max_size = np.rint(max_procentage_size * len(P0))
+
+                    length_of_copied_gene = random.randint(min_size, max_size)
+                    starting_index = random.randint(0,len(P0)-length_of_copied_gene)
+
+                    selected = np.arange(
+                        starting_index, 
+                        starting_index+length_of_copied_gene,
+                        1)
+                    used_indexes = []
+
+                    # Copying firs chunk (it has to be in separated loop)
+                    for index in selected:
+                        child[index] = P0[index]
+                        used_indexes.append(index)
+
+                    for index in selected:
+                        # Checking if value is already copied
+                        value_indexP1 = P1[index]
+                        if np.isin(value_indexP1, P0[selected]):
+                            pass
+                        else:
+                            # Retrying to fit P1's replaced number into spot where  
+                            # new number was moved from until spot is free
+                            value_indexP0 = P0[index]
+                            while True:
+                                index_to_place = np.where(P1 == value_indexP0)[0][0]
+                                if not np.isin(index_to_place, used_indexes):
+                                    break
+                                else:
+                                    value_indexP0 = P0[index_to_place]
+
+                            child[ index_to_place ] = value_indexP1
+                            used_indexes.append(index_to_place)
+
+                    # Copying rest of P1
+                    for i in range(len(child)):
+                        if not (i in used_indexes):
+                            child[i] = P1[i]
+
+                    new_population.append(child.tolist())
+            return new_population
 
         elif mode == "cx": # dla mnie
             children = []
@@ -239,12 +310,21 @@ class Population:
     
     def evolution(self, selection_mode = "roulette", crossover_mode = "ox", mutation_mode = "swap", mutation_rate=0.001, num_generations = 10, num_elites = 2):
 
-        self.figures = []
         self.fitnesses = []
         self.calculate_fitness()
 
-        for i in range(num_generations):
-            self.figures.append(self.plot_best_route(filename="fig" + str(i) + ".png", show=False, title=i, save=False))
+        # Making and clearing temporary folder for png's to create GIF
+        if os.path.exists('tmp_figures'):
+            shutil.rmtree('tmp_figures')
+        os.makedirs('tmp_figures')
+
+        print("Progres in simulating generations:")
+        for i in progressbar(range(num_generations), redirect_stdout=True):
+            self.plot_best_route(
+                filename = "tmp_figures/" + "fig" + str(i) + ".png", 
+                show=False, 
+                title=i, 
+                save=True)
             self.fitnesses.append(max(self.fitness))
             elites, mating_size = self.find_elites(num_elites)
             mating_pool = self.selection(selection_mode, mating_size)
@@ -253,10 +333,7 @@ class Population:
             self.population = elites + children
             self.calculate_fitness()
 
-        self.figures.append(self.plot_best_route(filename="fig" + str(num_generations) + ".png",
-                                                show=False,
-                                                title=num_generations,
-                                                save=False))
+        make_gif("tmp_figures/", num_generations, gif_path="../figures/generations.gif")
         self.fitnesses.append(max(self.fitness))
 
         self.route_lengths = [1/fitness for fitness in self.fitnesses]
