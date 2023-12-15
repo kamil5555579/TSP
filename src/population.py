@@ -53,8 +53,80 @@ class Population:
             
             return mating_pool
 
-        elif mode == "tournament": # drugi rodzaj selekcji też możesz zrobić
-            pass
+        elif mode == "tournament":
+
+            # Parameters
+            size_of_tournament = 3
+            chance_of_winning = 0.75 # procentage 1 == 100%
+
+            pop = np.array(self.population)
+            fitness = np.array(self.fitness)
+
+            # Counting needed data for correct amount of loops
+            amount_of_tournaments_in_one_go = int(np.floor(mating_size/size_of_tournament))
+            amount_of_needed_tournaments = int(np.ceil(mating_size/amount_of_tournaments_in_one_go))
+            new_pop_size = amount_of_needed_tournaments * amount_of_tournaments_in_one_go
+            
+            # Calculating winchances with formula: p(1-p)**n
+            winning_chances = []
+            for p in range(0, size_of_tournament):
+                winning_chances.append(chance_of_winning*((1-chance_of_winning)**p))
+            #print(f'Chances of winning: {winning_chances})
+
+            # Creating indexes for population
+            indexes = np.arange(0, mating_size, 1)
+            mating_pool = []
+
+            for tour_round in range(amount_of_needed_tournaments):
+                np.random.shuffle(indexes)
+                # Safety in case of having too much tournaments ex mating_size = 10, 
+                # tournament size = 3, ceilling(10/3)=4. Will give normaly
+                # in 3 goes 4+4+4 new pop so it prevents additional population and gets
+                # 4+4+2 (4 is cut off to 2 new pop).
+                if tour_round+1 == amount_of_needed_tournaments:
+                    amount_of_tournaments_in_this_go = mating_size - len(mating_pool)
+                else:
+                    amount_of_tournaments_in_this_go = amount_of_tournaments_in_one_go
+                     
+
+                for i in range(0, amount_of_tournaments_in_this_go):
+                    # Safety for situation in case population isn't dividual by tournament 
+                    # size
+                    if i*size_of_tournament+size_of_tournament > mating_size:
+                        tmp_indexes = indexes[i*size_of_tournament:]
+                    else:
+                        tmp_indexes = \
+                            indexes[i*size_of_tournament:i*size_of_tournament+size_of_tournament]
+
+                    # Sorting pop by fitness
+                    index_and_fitness =  np.array([tmp_indexes,fitness[tmp_indexes]])
+                    index_and_fitness = index_and_fitness.T
+                    index_and_fitness = \
+                        index_and_fitness[index_and_fitness[:,1].argsort()][::-1] 
+                    #print(f'pop: {pop[index_and_fitness[:,0].astype(int),:]}, 
+                    #fitness:{index_and_fitness[:,1]}' )
+
+                    # Checking who won
+                    random_number = random.random()
+                    for player in range(size_of_tournament):
+                        if random_number < sum(winning_chances[:player+1]):
+                            # print(f'{random_number}: {sum(winning_chances[:player+1])}')
+                            # If to make to not fall out of bounds
+                            if player >= len(tmp_indexes):
+                                winners_id = int(index_and_fitness[len(tmp_indexes)-1,0])
+                            else:
+                                winners_id = int(index_and_fitness[player,0])
+
+                            break
+                    # If to make sure always someone wins
+                    if random_number >= sum(winning_chances):
+                        winners_id = int(index_and_fitness[len(tmp_indexes)-1,0])
+
+                    mating_pool.append(pop[winners_id].tolist())
+
+            #print(f'Amount of people passed: {len(self.population)}')
+            return mating_pool
+            
         else:
             raise Exception("Wrong selection mode")
         
@@ -292,7 +364,7 @@ class Population:
         else:
             raise Exception("Wrong crossover mode")
         
-    def mutation(self, mode = "swap", chance = 0.001, children = []):
+    def mutation(self, mode = "swap", chance = 0.01, children = []):
         if mode == "swap":
             for person in children:
                 if random.random() <= chance: 
