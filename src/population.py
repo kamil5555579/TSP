@@ -234,8 +234,8 @@ class Population:
 
             for i in range(0, len(mating_pool), 2):
                 genome_length = len(self.population[i])
-                parent1 = mating_pool[i]
-                parent2 = mating_pool[i+1]
+                parent1 = np.array(mating_pool[i])
+                parent2 = np.array(mating_pool[i+1])
                 child1 = np.ones(genome_length, dtype=int) * -1
                 child2 = np.ones(genome_length, dtype=int) * -1
 
@@ -276,8 +276,8 @@ class Population:
 
                 for i in range(0, len(mating_pool), 2):
                     genome_length = len(self.population[i])
-                    parent1 = mating_pool[i]
-                    parent2 = mating_pool[i+1]
+                    parent1 = np.array(mating_pool[i])
+                    parent2 = np.array(mating_pool[i+1])
                     child = np.ones(genome_length, dtype=int) * -1 # -1 means that there is no city with such index
                     city = random.randint(0, genome_length - 1)
                     for i in range(genome_length-1):
@@ -319,8 +319,8 @@ class Population:
 
                 for i in range(0, len(mating_pool), 2):
                     genome_length = len(self.population[i])
-                    parent1 = mating_pool[i]
-                    parent2 = mating_pool[i+1]
+                    parent1 = np.array(mating_pool[i])
+                    parent2 = np.array(mating_pool[i+1])
                     child = np.ones(genome_length, dtype=int) * -1 # -1 means that there is no city with such index
                     city = random.randint(0, genome_length - 1)
                     parent1_city_index = np.where(parent1 == city)[0][0]
@@ -360,7 +360,67 @@ class Population:
             return children
 
         elif mode == "MSCX": # dla ciebie
-            pass
+            distance_matric = self.cityMap.adjacency_matrix
+            distance_matric[distance_matric == 0] = 999
+
+            children = []
+            if len(mating_pool)%2 == 1:
+                children.append(mating_pool[0])
+
+            for _ in range(2): # 2 parents only produce 1 child so we need to do it twice
+                # Creating two pools of parents
+                # P - stands for parent
+                rng = np.random.default_rng()
+                ref_indexes = np.arange(0, len(mating_pool), 1)
+                group_of_P0 = rng.choice(
+                    ref_indexes, 
+                    size=int(len(ref_indexes)/2), 
+                    replace=False)
+                group_of_P1 = ref_indexes[np.logical_not(np.isin(
+                    ref_indexes,
+                    group_of_P0))]
+                
+                for j in range(0, len(group_of_P0)):
+                    P0 = np.array(mating_pool[group_of_P0[j]])
+                    P1 = np.array(mating_pool[group_of_P1[j]])
+                    #print(f'P0: {P0}, P1: {P1}')
+                    child = np.zeros_like(P0)
+                    child[0] = P0[0]
+                    used_indexes = [P0[0]]
+
+                    for node in range(1,len(child)-1):
+                        i_P0 = node 
+                        i_P1 = node
+                        while True:
+                            if i_P0 == len(child)-1:
+                                distance_to_P0 = 999
+                                break
+                            if P0[i_P0] not in used_indexes:
+                                distance_to_P0 = distance_matric[child[node],P0[i_P0]]
+                                break
+                            i_P0 += 1
+
+                        while True:
+                            if i_P1 == len(child)-1:
+                                distance_to_P1 = 999
+                                break
+                            if P1[i_P1] not in used_indexes:
+                                distance_to_P1 = distance_matric[child[node],P1[i_P1]]
+                                break
+                            i_P1 += 1   
+
+                        if distance_to_P0 < distance_to_P1:
+                            child[i_P0] = P0[i_P0]
+                            used_indexes.append(P0[i_P0])
+                        else:
+                            child[i_P1] = P1[i_P1]
+                            used_indexes.append(P1[i_P1])
+
+                    #print(f'child: {child}')
+                    children.append(child.tolist())
+
+            print(len(children))
+            return children
         else:
             raise Exception("Wrong crossover mode")
         
