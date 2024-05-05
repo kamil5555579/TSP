@@ -1,4 +1,5 @@
 # TSP
+Solving Travelling Salesperson problem using Genetic Algorithm in Python.
 
 ## Crossover methods:
 - https://arxiv.org/pdf/2001.11590.pdf
