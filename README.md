@@ -1,8 +1,6 @@
 # TSP
 Solving Travelling Salesperson problem using Genetic Algorithm in Python.
 
-![alt text](results/vis.gif) ![alt text](results/cross.png)
-
 ## Presentation of results
 - [powerpoint](/results/TSP.pptx)
 - [pdf](/results/TSP.pdf)
